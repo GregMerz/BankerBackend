@@ -18,32 +18,36 @@ public class TransactionService {
         return transactionRepo.save(transaction);
     }
 
-    public Optional<Transaction> getById(Integer id) {
-        return transactionRepo.findById(id);
+    public Transaction getTransactionById(Integer id) {
+        return transactionRepo.findById(id).get();
     }
 
     public Iterable<Transaction> getAllTransactions() {
         return transactionRepo.findAll();
     }
 
-    public Transaction updateTransaction(Transaction transaction) {
-        return transactionRepo.save(transaction);
+    public Transaction updateTransaction(Integer transactionId, Transaction transaction) {
+        Transaction dbTransaction = transactionRepo.findById(transactionId).get();
+
+        dbTransaction.setCategory(transaction.getCategory());
+        dbTransaction.setDescription(transaction.getDescription());
+        dbTransaction.setPrice(transaction.getPrice());
+        dbTransaction.setVerified(transaction.getVerified());
+
+        return transactionRepo.save(dbTransaction);
+    }
+
+    public Transaction verifyTransaction(Integer id, String description, String category) {
+        Transaction dbTransaction = getTransactionById(id);
+
+        dbTransaction.setDescription(description);
+        dbTransaction.setCategory(category);
+        dbTransaction.setVerified(true);
+
+        return transactionRepo.save(dbTransaction);
     }
 
     public void deleteAll() {
         transactionRepo.deleteAll();
-    }
-
-    public Transaction verifyTransaction(Integer id, String description, String category) {
-        Optional<Transaction> foundTransaction = getById(id);
-        if (foundTransaction.isEmpty())
-            return null;
-
-        Transaction transaction = foundTransaction.get();
-        transaction.setDescription(description);
-        transaction.setCategory(category);
-        transaction.setVerified(true);
-
-        return updateTransaction(transaction);
     }
 }

@@ -23,10 +23,20 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("signup")
-    public @ResponseBody String addNewUser(@RequestBody User user) {
-        System.out.println("This is the user that is being saved: " + user);
-        userService.createUser(user);
-        return "User has been created";
+    public User addNewUser(@RequestBody User user) {
+        User createdUser = userService.createNewUser(user);
+        System.out.println("This is the user that is being saved: " + createdUser);
+        return createdUser;
+    }
+
+    @PostMapping("login")
+    public User logInUser(@RequestBody User user) {
+        boolean isUserInDB = userService.verifyUser(user);
+
+        if (!isUserInDB)
+            return null;
+
+        return user;
     }
 
     @GetMapping("all")

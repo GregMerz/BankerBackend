@@ -14,6 +14,26 @@ public class UserService {
     @Autowired
     UserRepo userRepo;
 
+    public User createNewUser(User user) {
+        User dbUser = userRepo.findByEmail(user.getEmail());
+
+        if (dbUser != null) {
+            return null;
+        }
+
+        return createUser(user);
+    }
+
+    public boolean verifyUser(User user) {
+        User dbUser = userRepo.findByEmail(user.getEmail());
+
+        if (dbUser != null && user.getPassword().equals(dbUser.getPassword())) {
+            return true;
+        }
+
+        return false;
+    }
+
     public User createUser(User user) {
         return userRepo.save(user);
     }
