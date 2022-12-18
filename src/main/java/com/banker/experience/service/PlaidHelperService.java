@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -107,6 +108,46 @@ public class PlaidHelperService {
                 System.out.println(ans.toString());
 
                 return ans.toString();
+            } else {
+                System.out.println("Returned with response code: " + response.statusCode());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String fetchTransactions(int count, String accessToken) {
+        JSONObject body = new JSONObject();
+
+        body.put("client_id", plaidClientId);
+        body.put("secret", plaidSecret);
+        body.put("access_token", accessToken);
+        body.put("cursor", JSONObject.NULL);
+        body.put("count", 8);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://sandbox.plaid.com/transactions/sync"))
+            .header("Content-Type", "application/json")
+            .POST(BodyPublishers.ofString(body.toString()))
+            .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            
+            if (response.statusCode() == 200) {
+                String responseBody = response.body();
+
+                JSONObject json = new JSONObject(responseBody);
+                JSONArray addedTxns = (JSONArray) json.get("added");
+
+                System.out.println(addedTxns.toString());
+
+                return addedTxns.toString();
             } else {
                 System.out.println("Returned with response code: " + response.statusCode());
             }

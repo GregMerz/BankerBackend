@@ -31,4 +31,9 @@ public class PlaidController {
     public String setAccessToken(@RequestParam("public_token") String publicToken) {
         return plaidHelperService.createAccessToken(publicToken);
     }
+
+    @PostMapping(path = "transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String fetchTransactions() {
+        return plaidHelperService.fetchTransactions(8, "access-sandbox-221d8ddd-cf10-4661-8525-276c53cf0ce1");
+    }
 }
