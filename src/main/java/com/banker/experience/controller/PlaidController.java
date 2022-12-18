@@ -4,6 +4,7 @@ import com.banker.experience.service.PlaidHelperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,8 +33,8 @@ public class PlaidController {
         return plaidHelperService.createAccessToken(publicToken);
     }
 
-    @PostMapping(path = "transactions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String fetchTransactions() {
-        return plaidHelperService.fetchTransactions(8, "access-sandbox-221d8ddd-cf10-4661-8525-276c53cf0ce1");
+    @GetMapping(path = "transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String fetchTransactions(String accessToken) {
+        return plaidHelperService.fetchTransactions(8, accessToken);
     }
 }
