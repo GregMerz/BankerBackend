@@ -31,12 +31,16 @@ public class UserController {
 
     @PostMapping("login")
     public User logInUser(@RequestBody User user) {
-        boolean isUserInDB = userService.verifyUser(user);
+        User userInDB = userService.verifyUser(user);
+        
 
-        if (!isUserInDB)
+        if (userInDB == null) {
+            System.out.println("Could not find user");
             return null;
+        }
 
-        return user;
+        System.out.println("User in db is: " + user);
+        return userInDB;
     }
 
     @GetMapping("all")

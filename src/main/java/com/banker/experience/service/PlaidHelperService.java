@@ -8,13 +8,20 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 
+import com.banker.experience.dao.UserRepo;
+import com.banker.experience.data.User;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PlaidHelperService {
+
+    @Autowired
+    UserRepo userRepo;
 
     @Value("${plaid.clientId}")
     private String plaidClientId;
@@ -76,7 +83,7 @@ public class PlaidHelperService {
         return null;
     }
 
-    public String createAccessToken(String publicToken) {
+    public String createAccessToken(String publicToken, int id) {
         JSONObject body = new JSONObject();
 
         body.put("client_id", plaidClientId);
@@ -99,6 +106,12 @@ public class PlaidHelperService {
                 JSONObject json = new JSONObject(responseBody);
                 String accessToken = json.getString("access_token");
                 String itemId = json.getString("item_id");
+
+                // TODO: Need to check if user with id exists
+                User userInDB = userRepo.findById(id).get();
+                userInDB.setAccessToken(accessToken);
+
+                userRepo.save(userInDB);
 
                 JSONObject ans = new JSONObject();
                 ans.put("access_token", accessToken);

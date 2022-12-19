@@ -29,8 +29,8 @@ public class PlaidController {
     }
 
     @PostMapping(path = "set_access_token", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String setAccessToken(@RequestParam("public_token") String publicToken) {
-        return plaidHelperService.createAccessToken(publicToken);
+    public String setAccessToken(@RequestParam("public_token") String publicToken, @RequestParam("id") int id) {
+        return plaidHelperService.createAccessToken(publicToken, id);
     }
 
     @GetMapping(path = "transactions", produces = MediaType.APPLICATION_JSON_VALUE)
