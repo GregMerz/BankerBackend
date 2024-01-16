@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.banker.experience.data.User;
+import com.banker.experience.service.PlaidHelperService;
 import com.banker.experience.service.UserService;
 
 @RestController
@@ -21,6 +23,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PlaidHelperService plaidHelperService;
 
     @PostMapping("signup")
     public User addNewUser(@RequestBody User user) {
@@ -37,6 +42,20 @@ public class UserController {
             return null;
 
         return user;
+    }
+
+    @PostMapping("create_link_token")
+    public String createLinkToken() {
+        String output = plaidHelperService.createLinkToken();
+
+        return output;
+    }
+
+    @PostMapping("set_access_token")
+    public String setAccessToken(@RequestParam String accessToken) {
+        String output = plaidHelperService.setAccessToken(accessToken);
+
+        return output;
     }
 
     @GetMapping("all")

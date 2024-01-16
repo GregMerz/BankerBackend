@@ -35,16 +35,16 @@ public class AmazonHelperService {
 
     @Value("${amazonProperties.secretKey}")
     private String secretKey;
-    
+
     @PostConstruct
     private void initializeAmazon() {
-       AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
-       this.s3client = new AmazonS3Client(credentials);
+        AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
+        this.s3client = new AmazonS3Client(credentials);
     }
 
     public String uploadFile(MultipartFile multipartFile) {
         String fileUrl = "";
-        
+
         try {
             File file = convertMultiPartToFile(multipartFile);
             String fileName = generateFileName(multipartFile);
@@ -52,7 +52,7 @@ public class AmazonHelperService {
             uploadFileTos3bucket(fileName, file);
             file.delete();
         } catch (Exception e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
 
         return fileUrl;
