@@ -8,18 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-<<<<<<< HEAD
-import org.springframework.web.bind.annotation.RequestParam;
-=======
->>>>>>> 4fe419d543a19954a8450abc70bc1636ade86ca3
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.banker.experience.data.User;
-<<<<<<< HEAD
-import com.banker.experience.service.PlaidHelperService;
-=======
->>>>>>> 4fe419d543a19954a8450abc70bc1636ade86ca3
 import com.banker.experience.service.UserService;
 
 @RestController
@@ -40,7 +32,6 @@ public class UserController {
     @PostMapping("login")
     public User logInUser(@RequestBody User user) {
         User userInDB = userService.verifyUser(user);
-        
 
         if (userInDB == null) {
             System.out.println("Could not find user");
