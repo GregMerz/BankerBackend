@@ -73,7 +73,8 @@ public class AmazonHelperService {
     }
 
     private String generateFileName(MultipartFile multiPart) {
-        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
+        String newFileName = new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
+        return newFileName;
     }
 
     private void uploadFileTos3bucket(String fileName, File file) {

@@ -1,101 +1,175 @@
 package com.banker.experience.service;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodyHandlers;
 
+import com.banker.experience.dao.UserRepo;
+import com.banker.experience.data.User;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.banker.experience.utils.PresetHttpClient;
 
 @Service
 public class PlaidHelperService {
 
-    @Value("${plaidProperties.clientId}")
-    private String clientId;
+    @Autowired
+    UserRepo userRepo;
 
-    @Value("${plaidProperties.secret}")
-    private String secretKey;
+    @Value("${plaid.clientId}")
+    private String plaidClientId;
 
-    @Value("${plaidProperties.env}")
-    private String env;
+    @Value("${plaid.secret}")
+    private String plaidSecret;
 
-    @Value("${plaidProperties.products}")
-    private String[] products;
+    @Value("${plaid.products}")
+    private String[] plaidProducts;
 
-    @Value("${plaidProperties.countryCodes}")
+    @Value("${plaid.country_codes}")
     private String[] countryCodes;
 
-    @Value("${plaidProperties.redirectURI}")
-    private String redirectURI;
-
     public String getInfo() {
-        JSONObject info = new JSONObject()
-                .put("item_id", JSONObject.NULL)
-                .put("access_token", JSONObject.NULL)
-                .put("products", products);
+        JSONObject obj = new JSONObject();
+        obj.put("item_id", JSONObject.NULL);
+        obj.put("access_token", JSONObject.NULL);
+        obj.put("products", plaidProducts);
 
-        return info.toString();
+        return obj.toString();
     }
 
     public String createLinkToken() {
-        String uri = "https://sandbox.plaid.com/link/token/create";
-        String[] headers = new String[] { "Content-Type", "application/json" };
-        JSONObject configs = new JSONObject()
-                .put("client_id", clientId)
-                .put("secret", secretKey)
-                .put("user", new JSONObject()
-                        .put("client_user_id", "user_id"))
-                .put("client_name", "Plaid Quickstart")
-                .put("products", products)
-                .put("country_codes", countryCodes)
-                .put("language", "en");
+        JSONObject body = new JSONObject();
 
-        if (redirectURI != "") {
-            configs.put("redirect_uri", redirectURI);
+        JSONObject user = new JSONObject();
+        user.put("client_user_id", "user-id");
+
+        body.put("client_id", plaidClientId);
+        body.put("secret", plaidSecret);
+        body.put("user", user);
+        body.put("client_name", "Plaid Quickstart");
+        body.put("products", plaidProducts);
+        body.put("country_codes", countryCodes);
+        body.put("language", "en");
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://sandbox.plaid.com/link/token/create"))
+                .header("Content-Type", "application/json")
+                .POST(BodyPublishers.ofString(body.toString()))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println(response.body());
+                return response.body();
+            } else {
+                System.out.println("Returned with response code: " + response.statusCode());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        // if (PLAID_ANDROID_PACKAGE_NAME !== '') {
-        // configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME
-        // }
-
-        HttpResponse<String> response = new PresetHttpClient().httpPost(uri, headers, configs);
-
-        if (response.statusCode() != 200) {
-            return null;
-        }
-
-        return response.body();
+        return null;
     }
 
-    public String setAccessToken(String accessToken) {
-        String uri = "https://sandbox.plaid.com/item/public_token/exchange";
-        String[] headers = new String[] { "Content-Type", "application/json" };
-        JSONObject data = new JSONObject()
-                .put("client_id", clientId)
-                .put("secret", secretKey)
-                .put("public_token", accessToken);
+    public String createAccessToken(String publicToken, int id) {
+        JSONObject body = new JSONObject();
 
-        HttpResponse<String> response = new PresetHttpClient().httpPost(uri, headers, data);
+        body.put("client_id", plaidClientId);
+        body.put("secret", plaidSecret);
+        body.put("public_token", publicToken);
 
-        if (response.statusCode() != 200) {
-            System.out.println(response.body());
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://sandbox.plaid.com/item/public_token/exchange"))
+                .header("Content-Type", "application/json")
+                .POST(BodyPublishers.ofString(body.toString()))
+                .build();
 
-            return null;
+        try {
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                String responseBody = response.body();
+
+                JSONObject json = new JSONObject(responseBody);
+                String accessToken = json.getString("access_token");
+                String itemId = json.getString("item_id");
+
+                // TODO: Need to check if user with id exists
+                User userInDB = userRepo.findById(id).get();
+                userInDB.setAccessToken(accessToken);
+
+                userRepo.save(userInDB);
+
+                JSONObject ans = new JSONObject();
+                ans.put("access_token", accessToken);
+                ans.put("item_id", itemId);
+                ans.put("error", JSONObject.NULL);
+
+                System.out.println(ans.toString());
+
+                return ans.toString();
+            } else {
+                System.out.println("Returned with response code: " + response.statusCode());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        String tokenResponse = response.body();
-        JSONObject tokenResponseJSON = new JSONObject(tokenResponse);
-
-        JSONObject createJsonResponse = new JSONObject()
-                .put("access_token", tokenResponseJSON.getString("access_token"))
-                .put("item_id", "item_id")
-                .put("error", JSONObject.NULL);
-
-        return createJsonResponse.toString();
+        return null;
     }
 
-    public String getTransactions() {
+    public String fetchTransactions(int count, String accessToken) {
+        JSONObject body = new JSONObject();
+
+        body.put("client_id", plaidClientId);
+        body.put("secret", plaidSecret);
+        body.put("access_token", accessToken);
+        body.put("cursor", JSONObject.NULL);
+        body.put("count", 8);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://sandbox.plaid.com/transactions/sync"))
+                .header("Content-Type", "application/json")
+                .POST(BodyPublishers.ofString(body.toString()))
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                String responseBody = response.body();
+
+                JSONObject json = new JSONObject(responseBody);
+                JSONArray addedTxns = (JSONArray) json.get("added");
+
+                System.out.println(addedTxns.toString());
+
+                return addedTxns.toString();
+            } else {
+                System.out.println("Returned with response code: " + response.statusCode());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 }

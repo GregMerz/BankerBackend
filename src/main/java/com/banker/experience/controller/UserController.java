@@ -8,12 +8,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+<<<<<<< HEAD
 import org.springframework.web.bind.annotation.RequestParam;
+=======
+>>>>>>> 4fe419d543a19954a8450abc70bc1636ade86ca3
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.banker.experience.data.User;
+<<<<<<< HEAD
 import com.banker.experience.service.PlaidHelperService;
+=======
+>>>>>>> 4fe419d543a19954a8450abc70bc1636ade86ca3
 import com.banker.experience.service.UserService;
 
 @RestController
@@ -24,9 +30,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private PlaidHelperService plaidHelperService;
-
     @PostMapping("signup")
     public User addNewUser(@RequestBody User user) {
         User createdUser = userService.createNewUser(user);
@@ -36,26 +39,16 @@ public class UserController {
 
     @PostMapping("login")
     public User logInUser(@RequestBody User user) {
-        boolean isUserInDB = userService.verifyUser(user);
+        User userInDB = userService.verifyUser(user);
+        
 
-        if (!isUserInDB)
+        if (userInDB == null) {
+            System.out.println("Could not find user");
             return null;
+        }
 
-        return user;
-    }
-
-    @PostMapping("create_link_token")
-    public String createLinkToken() {
-        String output = plaidHelperService.createLinkToken();
-
-        return output;
-    }
-
-    @PostMapping("set_access_token")
-    public String setAccessToken(@RequestParam String accessToken) {
-        String output = plaidHelperService.setAccessToken(accessToken);
-
-        return output;
+        System.out.println("User in db is: " + user);
+        return userInDB;
     }
 
     @GetMapping("all")

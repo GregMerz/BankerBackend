@@ -1,8 +1,5 @@
 package com.banker.experience.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.banker.experience.dao.TransactionRepo;
@@ -33,6 +30,7 @@ public class TransactionService {
         dbTransaction.setDescription(transaction.getDescription());
         dbTransaction.setPrice(transaction.getPrice());
         dbTransaction.setVerified(transaction.getVerified());
+        dbTransaction.setReceiptUrl(transaction.getReceiptUrl());
 
         return transactionRepo.save(dbTransaction);
     }

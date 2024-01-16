@@ -35,4 +35,7 @@ public class Transaction {
 
     @Column(name = "verified")
     Boolean verified;
+
+    @Column(name = "receiptUrl")
+    String receiptUrl;
 }
