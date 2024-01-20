@@ -38,7 +38,6 @@ public class UserController {
             return null;
         }
 
-        System.out.println("User in db is: " + user);
         return userInDB;
     }
 

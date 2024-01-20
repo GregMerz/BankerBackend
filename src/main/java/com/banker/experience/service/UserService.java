@@ -28,10 +28,7 @@ public class UserService {
     }
 
     public User verifyUser(User user) {
-        System.out.println("User: " + user);
-
         User dbUser = userRepo.findByEmail(user.getEmail());
-        System.out.println("dbUser: " + dbUser);
 
         if (dbUser != null && user.getPassword().equals(dbUser.getPassword())) {
             return dbUser;

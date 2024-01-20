@@ -133,12 +133,14 @@ public class PlaidHelperService {
         return null;
     }
 
-    public String fetchTransactions(int count, String accessToken) {
+    public String fetchTransactions(int id) {
+        User user = userRepo.getReferenceById(id);
+
         JSONObject body = new JSONObject();
 
         body.put("client_id", plaidClientId);
         body.put("secret", plaidSecret);
-        body.put("access_token", accessToken);
+        body.put("access_token", user.getAccessToken());
         body.put("cursor", JSONObject.NULL);
         body.put("count", 8);
 

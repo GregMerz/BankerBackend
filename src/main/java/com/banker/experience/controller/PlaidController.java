@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/plaid/")
 @CrossOrigin(origins = "http://localhost:19006")
 public class PlaidController {
-    
+
     @Autowired
     private PlaidHelperService plaidHelperService;
 
@@ -34,7 +34,7 @@ public class PlaidController {
     }
 
     @GetMapping(path = "transactions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String fetchTransactions(String accessToken) {
-        return plaidHelperService.fetchTransactions(8, accessToken);
+    public String fetchTransactions(@RequestParam("id") Integer id) {
+        return plaidHelperService.fetchTransactions(id);
     }
 }

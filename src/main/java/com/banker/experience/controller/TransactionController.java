@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.banker.experience.data.Transaction;
@@ -32,9 +33,9 @@ public class TransactionController {
     }
 
     @PostMapping("addUnverified")
-    public @ResponseBody String addTransaction(@RequestBody Transaction transaction) {
+    public @ResponseBody String addTransaction(@RequestBody Transaction transaction, @RequestParam Integer userId) {
         System.out.println("This is the transaction: " + transaction);
-        transactionService.createTransaction(transaction);
+        transactionService.createTransaction(transaction, userId);
         return "Saved";
     }
 
@@ -45,8 +46,8 @@ public class TransactionController {
     }
 
     @GetMapping("all")
-    public @ResponseBody Iterable<Transaction> getAllTransaction() {
-        return transactionService.getAllTransactions();
+    public @ResponseBody Iterable<Transaction> getAllTransaction(@RequestParam Integer userId) {
+        return transactionService.getAllTransactions(userId);
     }
 
     @DeleteMapping("deleteAll")
